@@ -50,9 +50,6 @@ int SaveFramesFromCamera() {
 
 	cout << "How many frames do you want to save? ";
 	cin >> frames;
-	//cout << "Set time offset in ms";
-	//cin >> timeoffset;
-
 
 	while (count++ < frames) {
 		cap >> frame;
