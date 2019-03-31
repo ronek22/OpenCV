@@ -13,7 +13,7 @@ int firstExercise() {
 
 	Mat frame, gauss, sobel_x, sobel_y, detected_edges;
 	Mat sobel_x_bin, sobel_y_bin;
-	Mat gradient, angle, gradient_colored;
+	Mat gradient, angle, gradient_bin, gradient_colored;
 
 	if (!cap.isOpened()) {
 		cout << "Cannot open camera";
@@ -52,11 +52,14 @@ int firstExercise() {
 		Sobel(gauss, sobel_y, CV_32F, 0.0, 1.0, sobel_mask);
 		threshold(sobel_y, sobel_y_bin, prog_bin, prog_bin_max, THRESH_BINARY);
 		
-		cartToPolar(sobel_x_bin, sobel_y_bin, gradient, angle, true);
+		cartToPolar(sobel_x, sobel_y, gradient, angle, true);
+		threshold(gradient, gradient_bin, prog_bin, prog_bin_max, THRESH_BINARY);
+
 		
 		gradient.copyTo(gradient_colored);
 		cvtColor(gradient_colored, gradient_colored, COLOR_GRAY2BGR);
 		gradient_colored.convertTo(gradient_colored, CV_8UC3, 255);
+		float edge;
 		float angle_value;
 
 		Vec3b red = Vec3b(0, 0, 255);
@@ -66,13 +69,9 @@ int firstExercise() {
 
 		for (int i = 0; i < gradient.rows; i++) {
 			for (int j = 0; j < gradient.cols; j++) {
-
 				angle_value = angle.at<float>(i, j);
+				edge = (float)gradient_colored.at<uchar>(i, j);
 
-				// angle zawiera tylko trzy wartosci katow 0, 44.9, 90, dlaczego?
-
-				//if (angle_value > 0)
-				//	cout << angle_value << endl;
 
 				Vec3b *color = &gradient_colored.at<Vec3b>(i, j);
 
@@ -92,7 +91,8 @@ int firstExercise() {
 		imshow("sobel x", sobel_x_bin);
 		imshow("sobel y", sobel_y_bin);
 		imshow("canny", detected_edges);
-		imshow("gradient magnitude", gradient);
+		imshow("gradient magnitude binary", gradient_bin);
+
 		imshow("gradient colored", gradient_colored);
 
 	}
