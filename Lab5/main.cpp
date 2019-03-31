@@ -7,6 +7,10 @@
 using namespace cv;
 using namespace std;
 
+bool isBlack(Vec3b color) {
+	return color[0] == 0 && color[1] == 0 && color[2] == 0;
+}
+
 
 int firstExercise() {
 	VideoCapture cap(0);
@@ -33,8 +37,6 @@ int firstExercise() {
 	createTrackbar("ratio", "settings", &ratio, 20);
 	createTrackbar("gaus", "settings", &gauss_size, 250);
 	createTrackbar("sobel_mask", "settings", &sobel_mask, 9);
-	//createTrackbar("prog bin", "settings", &prog_bin, 50);
-	//createTrackbar("prog bin max", "settings", &prog_bin_max, 255);
 
 	while (waitKey(30) != 27) {
 		cap.read(frame);
@@ -47,9 +49,9 @@ int firstExercise() {
 
 		Canny(gauss, detected_edges, threshold_slider, threshold_slider * ratio, 3);
 
-		Sobel(gauss, sobel_x, CV_32F, 1.0, 0.0, sobel_mask);
+		Sobel(gauss, sobel_x, CV_32F, 1, 0, sobel_mask);
 		threshold(sobel_x, sobel_x_bin, prog_bin, prog_bin_max, THRESH_BINARY);
-		Sobel(gauss, sobel_y, CV_32F, 0.0, 1.0, sobel_mask);
+		Sobel(gauss, sobel_y, CV_32F, 0, 1, sobel_mask);
 		threshold(sobel_y, sobel_y_bin, prog_bin, prog_bin_max, THRESH_BINARY);
 		
 		cartToPolar(sobel_x, sobel_y, gradient, angle, true);
@@ -66,31 +68,36 @@ int firstExercise() {
 		Vec3b green = Vec3b(0, 255, 0);
 		Vec3b blue = Vec3b(255, 0, 0);
 		Vec3b white = Vec3b(255, 255, 255);
+		Vec3b black = Vec3b(0, 0, 0);
 
 		for (int i = 0; i < gradient.rows; i++) {
 			for (int j = 0; j < gradient.cols; j++) {
 				angle_value = angle.at<float>(i, j);
-				edge = (float)gradient_colored.at<uchar>(i, j);
-
-
 				Vec3b *color = &gradient_colored.at<Vec3b>(i, j);
+				float *color_bin = &gradient_bin.at<float>(i, j);
 
-				if (angle_value > 45 && angle_value <= 135)
-					* color = white;
-				if (angle_value > 135 && angle_value <= 255)
-					* color = blue;
-				if (angle_value > 255 && angle_value <= 315)
-					* color = green;
-				if ((angle_value > 315 && angle_value <= 360) || (angle_value > 0 && angle_value <= 45))
-					* color = red;
-				
+				if (*color_bin > 0) {
+					if (angle_value > 45 && angle_value <= 135)
+						* color = white;
+					if (angle_value > 135 && angle_value <= 255)
+						* color = blue;
+					if (angle_value > 255 && angle_value <= 315)
+						* color = green;
+					if ((angle_value > 315 && angle_value <= 360) || (angle_value > 0 && angle_value <= 45))
+						* color = red;
+				}
+				else {
+					* color = black;
+				}
+
+			
 			}
 		}
 
-		imshow("gauss", gauss);
+	/*	imshow("gauss", gauss);
 		imshow("sobel x", sobel_x_bin);
 		imshow("sobel y", sobel_y_bin);
-		imshow("canny", detected_edges);
+		imshow("canny", detected_edges);*/
 		imshow("gradient magnitude binary", gradient_bin);
 
 		imshow("gradient colored", gradient_colored);
