@@ -7,8 +7,10 @@
 using namespace cv;
 using namespace std;
 
-bool isBlack(Vec3b color) {
-	return color[0] == 0 && color[1] == 0 && color[2] == 0;
+int getOdd(int value) {
+	if (value % 2 == 0) 
+		return value + 1;
+	return value;
 }
 
 
@@ -25,29 +27,28 @@ int firstExercise() {
 	}
 
 	
-	int threshold_slider = 50;
-	int ratio = 3;
+	int threshold_bottom = 50;
+	int threshold_up = 150;
 	int gauss_size = 3;
 	int sobel_mask = 3;
 	int prog_bin = 20;
 	int prog_bin_max = 255;
 
 	namedWindow("settings", 1);
-	createTrackbar("threshold", "settings", &threshold_slider, 100);
-	createTrackbar("ratio", "settings", &ratio, 20);
-	createTrackbar("gaus", "settings", &gauss_size, 250);
+	createTrackbar("threshold_bottom", "settings", &threshold_bottom, 100);
+	createTrackbar("threshold_top", "settings", &threshold_up, 250);
+	createTrackbar("gauss", "settings", &gauss_size, 250);
 	createTrackbar("sobel_mask", "settings", &sobel_mask, 9);
 
 	while (waitKey(30) != 27) {
 		cap.read(frame);
 
-		gauss_size = gauss_size % 2 == 0 ? gauss_size + 1 : gauss_size;
-		sobel_mask = sobel_mask % 2 == 0 ? sobel_mask + 1 : sobel_mask;
+		gauss_size = getOdd(gauss_size);
+		sobel_mask = getOdd(gauss_size);
 		
 		cvtColor(frame, frame, COLOR_BGR2GRAY);
 		GaussianBlur(frame, gauss, Size(gauss_size, gauss_size), 2.0);
-
-		Canny(gauss, detected_edges, threshold_slider, threshold_slider * ratio, 3);
+		Canny(gauss, detected_edges, threshold_bottom, threshold_up, 3);
 
 		Sobel(gauss, sobel_x, CV_32F, 1, 0, sobel_mask);
 		threshold(sobel_x, sobel_x_bin, prog_bin, prog_bin_max, THRESH_BINARY);
@@ -61,7 +62,6 @@ int firstExercise() {
 		gradient.copyTo(gradient_colored);
 		cvtColor(gradient_colored, gradient_colored, COLOR_GRAY2BGR);
 		gradient_colored.convertTo(gradient_colored, CV_8UC3, 255);
-		float edge;
 		float angle_value;
 
 		Vec3b red = Vec3b(0, 0, 255);
@@ -94,12 +94,11 @@ int firstExercise() {
 			}
 		}
 
-	/*	imshow("gauss", gauss);
+		imshow("gauss", gauss);
 		imshow("sobel x", sobel_x_bin);
 		imshow("sobel y", sobel_y_bin);
-		imshow("canny", detected_edges);*/
+		imshow("canny", detected_edges);
 		imshow("gradient magnitude binary", gradient_bin);
-
 		imshow("gradient colored", gradient_colored);
 
 	}
@@ -110,6 +109,8 @@ int firstExercise() {
 	detected_edges.release();
 	cap.release();
 	cv::destroyAllWindows();
+
+	return 0;
 }
 
 
