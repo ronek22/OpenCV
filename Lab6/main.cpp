@@ -148,12 +148,7 @@ int secondExercise() {
 		if (current_time - last_recorded_time >= 5)
 		{
 			putText(frame_orig, "ZMIANA!", Point(70, 70), FONT_HERSHEY_PLAIN, 2, Scalar(0, 0, 255, 255));
-			if (i == 0)
-				i = 1;
-			else if (i == 1)
-				i = 2;
-			else if (i == 2)
-				i = 0;
+			i = i++ % 3;
 			last_recorded_time = current_time;
 		}
 
