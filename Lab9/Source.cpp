@@ -16,11 +16,11 @@ char rawWindow[] = "Raw Video";
 char opticalFlowWindow[] = "Optical Flow Window";
 char keyPressed;
 
-int maxCorners = 50;
+int maxCorners = 100;
 int qualityLevel = 1;
 int minDistance = 5;
 bool changed = false;
-Scalar color = Scalar(255, 255, 255);
+Scalar color = Scalar(0, 0, 255);
 
 double prepareDoubleValue(int min, int max, int ratio) {
 	double val = (double)min / max;
@@ -41,7 +41,8 @@ bool pointInsideImage(Point2f point) {
 }
 
 bool isPointMoving(Point2f p1, Point2f p2) {
-	return (abs(p1.x - p2.x) >= 2 || abs(p1.y - p2.y) >= 2);
+	return (abs(p1.x - p2.x) >= 2 || 
+		abs(p1.y - p2.y) >= 2);
 }
 
 void ValueChange(int, void*) {
@@ -166,7 +167,6 @@ void videoOpticalFlow() {
 		cvtColor(frame, grayFrames, COLOR_BGR2GRAY);
 		double newQuality = guardRange(prepareDoubleValue(qualityLevel, 100, 1));
 
-
 		if (needToInit) {
 			goodFeaturesToTrack(grayFrames, nextPoints, maxCorners, newQuality, minDistance, Mat());
 			needToInit = false;
@@ -179,7 +179,7 @@ void videoOpticalFlow() {
 				draw(frame, prevPoints[i], nextPoints[i]);
 				draw(opticalFlow, prevPoints[i], nextPoints[i]);
 
-				if (!pointInsideImage(nextPoints[i]) || !isPointMoving(nextPoints[i], prevPoints[i])) {
+				if (!isPointMoving(nextPoints[i], prevPoints[i])) {
 					nextPoints.erase(nextPoints.begin() + i);
 					prevPoints.erase(prevPoints.begin() + i);
 				}
